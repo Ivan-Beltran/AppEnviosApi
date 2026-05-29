@@ -8,31 +8,29 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class User
+    public class Receiver
     {
-        [Key]
+        [Key]   
         public int Id { get; set; }
+
         [Required]
         public string FullName { get; set; }
         [Required]
-
         public string Phone { get; set; }
         [Required]
-
-        public String Email { get; set; }
-
+        public string Email { get; set; }
         [Required]
-        public byte[] Password { get; set; }
+        public string Address { get; set; }
         [Required]
+        public int CreatedByUserId { get; set; }
 
-        public string Salt { get; set; }
+        [ForeignKey("CreatedByUserId")]
+        public User CreatedByUser { get; set; }
         [Required]
+        public int DistrictId { get; set; }
+        [ForeignKey("DistrictId")]
+        public District District { get; set; }
 
-        public bool IsActive { get; set; } = true;
-        [Required]
-        public int RoleId { get; set; }
 
-        [ForeignKey("RoleId")]
-        public Role Role { get; set; }
     }
 }

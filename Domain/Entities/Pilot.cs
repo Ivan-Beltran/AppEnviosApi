@@ -8,31 +8,24 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class User
+    public class Pilot
     {
         [Key]
         public int Id { get; set; }
         [Required]
-        public string FullName { get; set; }
+        public int UserId { get; set; }
+        [ForeignKey("UserId")]
+        public User User { get; set; }
         [Required]
-
-        public string Phone { get; set; }
+        public string LicenseNumber { get; set; }
         [Required]
-
-        public String Email { get; set; }
-
+        public int BranchId { get; set; }
+        [ForeignKey("BranchId")]
+        public Branch Branch { get; set; }
         [Required]
-        public byte[] Password { get; set; }
-        [Required]
-
-        public string Salt { get; set; }
-        [Required]
-
         public bool IsActive { get; set; } = true;
         [Required]
-        public int RoleId { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        [ForeignKey("RoleId")]
-        public Role Role { get; set; }
     }
 }
