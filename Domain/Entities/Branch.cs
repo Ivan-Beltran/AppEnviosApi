@@ -12,13 +12,16 @@ namespace Domain.Entities
     {
         [Key]
         public int Id { get; set; }
-        [Required]
-        public string BranchName { get; set; }
-        [Required]
-        public string Address { get; set; }
-        [Required]
-        public int DistrictId { get; set; }
-        [ForeignKey("DistrictId")]
-        public District District { get; set; }
-    }
+		[Required]
+		public string BranchName { get; set; } = string.Empty;
+
+		[Required]
+		public string Address { get; set; } = string.Empty;
+
+		[Required]
+		public int DistrictId { get; set; }
+
+		[ForeignKey("DistrictId")]
+		public District? District { get; set; }
+	}
 }

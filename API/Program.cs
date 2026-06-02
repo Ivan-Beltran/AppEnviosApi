@@ -1,10 +1,11 @@
 using Application.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using Application.Services;  
+using Application.Services;
+using Domain.Interfaces;
 using Infrastructure.Repositories;
-using Domain.Interfaces;     
+using Microsoft.EntityFrameworkCore;
+  
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,11 +23,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped < IUserRepository, UserRepository>();
 builder.Services.AddScoped < IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<UserService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<BranchService>();
 
 
 

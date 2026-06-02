@@ -1,83 +1,78 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.DTOs;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    public class BranchController : Controller
-    {
-        // GET: BranchController
-        public ActionResult Index()
-        {
-            return View();
-        }
+	[Route("api/[controller]")]
+	[ApiController]
+	public class BranchController : ControllerBase
+	{
+		private readonly BranchService _branchService;
 
-        // GET: BranchController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
+		public BranchController(BranchService branchService)
+		{
+			_branchService = branchService;
+		}
 
-        // GET: BranchController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+		// GET: api/Branch
+		[HttpGet]
+		public async Task<IActionResult> ObtenerTodos()
+		{
+			var branches = await _branchService.ObtenerTodos();
 
-        // POST: BranchController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+			return Ok(branches);
+		}
 
-        // GET: BranchController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+		// GET: api/Branch/5
+		[HttpGet("{id}")]
+		public async Task<IActionResult> ObtenerPorId(int id)
+		{
+			var branch = await _branchService.ObtenerPorId(id);
 
-        // POST: BranchController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+			if (branch == null)
+			{
+				return NotFound(new { mensaje = "Sucursal no encontrada" });
+			}
 
-        // GET: BranchController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+			return Ok(branch);
+		}
 
-        // POST: BranchController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-    }
+		// POST: api/Branch
+		[HttpPost]
+		public async Task<IActionResult> Crear([FromBody] BranchDTO branchDTO)
+		{
+			var branchCreada = await _branchService.Crear(branchDTO);
+
+			return Ok(branchCreada);
+		}
+
+		// PUT: api/Branch/5
+		[HttpPut("{id}")]
+		public async Task<IActionResult> Actualizar(int id, [FromBody] BranchDTO branchDTO)
+		{
+			var branchActualizada = await _branchService.Actualizar(id, branchDTO);
+
+			if (branchActualizada == null)
+			{
+				return NotFound(new { mensaje = "Sucursal no encontrada" });
+			}
+
+			return Ok(branchActualizada);
+		}
+
+		// DELETE: api/Branch/5
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> Eliminar(int id)
+		{
+			var eliminado = await _branchService.Eliminar(id);
+
+			if (!eliminado)
+			{
+				return NotFound(new { mensaje = "Sucursal no encontrada" });
+			}
+
+			return Ok(new { mensaje = "Sucursal eliminada correctamente" });
+		}
+	}
 }
