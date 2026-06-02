@@ -11,10 +11,8 @@ namespace Domain.Entities
     public class Pilot
     {
         [Key]
+        [ForeignKey("User")]
         public int Id { get; set; }
-        [Required]
-        public int UserId { get; set; }
-        [ForeignKey("UserId")]
         public User User { get; set; }
         [Required]
         public string LicenseNumber { get; set; }

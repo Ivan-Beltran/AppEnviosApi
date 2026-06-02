@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    internal class BranchRepository
+    public class BranchRepository
     {
     }
 }

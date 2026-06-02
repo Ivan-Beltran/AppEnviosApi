@@ -11,17 +11,20 @@ namespace Domain.Entities
     public class AdminArea
     {
         [Key]
+        [ForeignKey("User")]
         public int Id { get; set; }
-        [Required]
-        public int UserId { get; set; }
-        [ForeignKey("UserId")]
+
         public User User { get; set; }
+
         public bool IsActive { get; set; } = true;
+
         [Required]
         public int BranchId { get; set; }
+
         [ForeignKey("BranchId")]
         public Branch Branch { get; set; }
-        [Required]  
+
+        [Required]
         public DateTime CreatedAt { get; set; }
     }
 }

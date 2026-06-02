@@ -34,29 +34,69 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ShipmentCost>()
-                .Property(x => x.Cost)
-                .HasPrecision(18, 2);
+            // =========================================================================
+            // 1. CONFIGURACIÓN TPT (HERENCIA DE ROLES / EXTENSION TABLES)
+            // =========================================================================
+            // Indicamos a EF Core que el ID de estas tablas hijas NO es autoincrementable (Identity),
+            // sino que hereda y depende directamente del Id generado por la tabla de Users.
 
-            modelBuilder.Entity<ShipmentCost>()
-                .Property(x => x.Discount)
-                .HasPrecision(18, 2);
+            modelBuilder.Entity<AdminArea>()
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
 
-            modelBuilder.Entity<ShipmentCost>()
-                .Property(x => x.TotalCost)
-                .HasPrecision(18, 2);
+            modelBuilder.Entity<Pilot>()
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
 
-            modelBuilder.Entity<Shipment>()
-                .HasOne(s => s.DistrictDelivery)
-                .WithMany()
-                .HasForeignKey(s => s.DistrictDeliveryId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<CompanyClient>()
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
 
+            modelBuilder.Entity<Admin>()
+                .Property(p => p.Id)
+                .ValueGeneratedNever();
+
+
+            // =========================================================================
+            // 2. PROTECCIÓN CONTRA EL BORRADO EN CASCADA EN ENVIOS (SHIPMENTS)
+            // =========================================================================
+            // Cambiamos todos los DeleteBehavior a "Restrict" (NO ACTION en SQL Server).
+            // Esto rompe los bucles y caminos múltiples de borrado que hacían fallar la migración.
+
+            // Corrección del primer error (Receiver)
             modelBuilder.Entity<Shipment>()
                 .HasOne(s => s.Receiver)
                 .WithMany()
                 .HasForeignKey(s => s.ReceiverId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Corrección del segundo error (DistrictDelivery)
+            modelBuilder.Entity<Shipment>()
+                .HasOne(s => s.DistrictDelivery) // Asegúrate de que este sea el nombre de la propiedad en tu clase Shipment
+                .WithMany()
+                .HasForeignKey(s => s.DistrictDeliveryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Prevención de errores futuros en cascada por Branch (Sucursales)
+            modelBuilder.Entity<Shipment>()
+                .HasOne(s => s.Branch)
+                .WithMany()
+                .HasForeignKey(s => s.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Prevención por el Usuario que lo creó
+            modelBuilder.Entity<Shipment>()
+                .HasOne(s => s.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(s => s.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Prevención por el Estado del Envío
+            modelBuilder.Entity<Shipment>()
+                .HasOne(s => s.ShipmentStatus)
+                .WithMany()
+                .HasForeignKey(s => s.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

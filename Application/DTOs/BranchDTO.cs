@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs
 {
-    internal class BranchDTO
+    public class BranchDTO
     {
     }
 }

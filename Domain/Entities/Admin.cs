@@ -11,11 +11,9 @@ namespace Domain.Entities
     public class Admin
     {
         [Key]
+        [ForeignKey("User")]
         public int Id { get; set; }
 
-        public int UserId { get; set; }
-
-        [ForeignKey("UserId")]
         public User User { get; set; }
         public bool IsActive { get; set; } = true;
 
