@@ -6,7 +6,15 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs
 {
-    internal class BranchDTO
+    public class BranchDTO
     {
-    }
+		public int Id { get; set; }
+
+		public string BranchName { get; set; } = string.Empty;
+
+		public string Address { get; set; } = string.Empty;
+
+		public int DistrictId { get; set; }
+
+	}
 }
