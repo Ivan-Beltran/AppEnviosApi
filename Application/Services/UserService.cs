@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces;
-
 namespace Application.Services
 {
     public class UserService
@@ -15,12 +14,16 @@ namespace Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
         private readonly IAdminRepository _adminRepository;
+        private readonly ITokenService _tokenService;
+    
+            
 
-        public UserService(IUserRepository userRepository, IPasswordService passwordService,IAdminRepository adminRepository)
+        public UserService(IUserRepository userRepository, IPasswordService passwordService,IAdminRepository adminRepository, ITokenService tokenService)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _adminRepository = adminRepository;
+            _tokenService = tokenService;
         }
 
         public async Task<int> CreateAdminGlobal(CreateUserDTO createUserdto)
@@ -49,6 +52,24 @@ namespace Application.Services
             await _adminRepository.Create(AdminExtension);
 
             return createdUser.Id;
+        }
+
+        public async Task<string?> Login(LoginDTO dto)
+        {
+           
+            var user = await _userRepository.GetByEmailWithRole(dto.Email);
+
+            if (user == null || !user.IsActive) return null;
+
+            bool isPasswordCorrect = _passwordService.VerifyPassword(dto.Password, user.Salt, user.Password);
+
+            if (!isPasswordCorrect)
+            {
+                return null; 
+            }
+
+            return _tokenService.GenerateToken(user);
+            
         }
     }
 }

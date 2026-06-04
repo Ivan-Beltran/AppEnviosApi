@@ -18,9 +18,9 @@ namespace Application.Services
 			_branchRepository = branchRepository;
 		}
 
-		public async Task<List<BranchDTO>> ObtenerTodos()
+		public async Task<List<BranchDTO>> GetAll()
 		{
-			var branches = await _branchRepository.ObtenerTodos();
+			var branches = await _branchRepository.GetAll();
 
 			return branches.Select(branch => new BranchDTO
 			{
@@ -34,9 +34,9 @@ namespace Application.Services
             }).ToList();
 		}
 
-		public async Task<BranchDTO?> ObtenerPorId(int id)
+		public async Task<BranchDTO?> GetById(int id)
 		{
-			var branch = await _branchRepository.ObtenerPorId(id);
+			var branch = await _branchRepository.GetById(id);
 
 			if (branch == null)
 			{
@@ -52,7 +52,7 @@ namespace Application.Services
 			};
 		}
 
-		public async Task<BranchDTO> Crear(BranchDTO  branchDTO)
+		public async Task<BranchDTO> Create(BranchDTO  branchDTO)
 		{
 			var branch = new Branch
 			{
@@ -61,14 +61,14 @@ namespace Application.Services
 				DistrictId = branchDTO.DistrictId
 			};
 
-			var branchCreada = await _branchRepository.Crear(branch);
+			var branchCreada = await _branchRepository.Create(branch);
 
 			branchDTO.Id = branchCreada.Id;
 
 			return branchDTO;
 
 		}
-		public async Task<BranchDTO?> Actualizar(int id, BranchDTO branchDTO)
+		public async Task<BranchDTO?> Update(int id, BranchDTO branchDTO)
 		{
 			var branch = new Branch
 			{
@@ -77,7 +77,7 @@ namespace Application.Services
 				DistrictId = branchDTO.DistrictId
 			};
 
-			var branchActualizada = await _branchRepository.Actualizar(id, branch);
+			var branchActualizada = await _branchRepository.Update(id, branch);
 
 			if (branchActualizada == null)
 			{
@@ -94,9 +94,9 @@ namespace Application.Services
 
 		}
 
-		public async Task<bool> Eliminar(int id)
+		public async Task<bool> Delete(int id)
 		{
-			return await _branchRepository.Eliminar(id);
+			return await _branchRepository.Delete(id);
 		}
 
 	}

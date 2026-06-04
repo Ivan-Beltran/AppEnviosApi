@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Interfaces
+namespace Application.Interfaces
 {
-    public interface IUserRepository
+    public interface ITokenService
     {
-        Task <User> Create(User user);
+        string GenerateToken(User user);
 
-        Task<User?> GetByEmailWithRole(string email);
 
     }
 }

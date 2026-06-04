@@ -19,7 +19,7 @@ namespace Infrastructure.Repositories
 			_context = context;
 		}
 
-		public async Task<List<Branch>> ObtenerTodos()
+		public async Task<List<Branch>> GetAll()
 		{
 			return await _context.Branches
 				.Include(b=> b.District)
@@ -27,12 +27,12 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
 		}
 
-		public async Task<Branch?> ObtenerPorId(int id)
+		public async Task<Branch?> GetById(int id)
 		{
 			return await _context.Branches.FindAsync(id);
 		}
 
-		public async Task<Branch> Crear(Branch branch)
+		public async Task<Branch> Create(Branch branch)
 		{
 			_context.Branches.Add(branch);
 
@@ -41,7 +41,7 @@ namespace Infrastructure.Repositories
 			return branch;
 		}
 
-		public async Task<Branch?> Actualizar(int id, Branch branch)
+		public async Task<Branch?> Update(int id, Branch branch)
 		{
 			var branchExistente = await _context.Branches.FindAsync(id);
 
@@ -59,7 +59,7 @@ namespace Infrastructure.Repositories
 			return branchExistente;
 		}
 
-		public async Task<bool> Eliminar(int id)
+		public async Task<bool> Delete(int id)
 		{
 			var branch = await _context.Branches.FindAsync(id);
 

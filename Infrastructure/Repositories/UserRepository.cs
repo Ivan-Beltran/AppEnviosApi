@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Domain.Entities;
+using Domain.Interfaces;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Infrastructure.Data;
-using Domain.Entities;
-using Domain.Interfaces;
 
 namespace Infrastructure.Repositories
 {
@@ -23,6 +24,14 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<User?> GetByEmailWithRole(string email)
+        {
+            return await _context.Users
+                .AsNoTracking() 
+                .Include(u => u.Role) 
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
     }
 }

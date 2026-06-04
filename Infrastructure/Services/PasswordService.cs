@@ -21,9 +21,24 @@ namespace Infrastructure.Services
         }
         public bool VerifyPassword(string password, string salt, byte[] hash)
         {
+            // 1. Calculamos el hash de la contraseña que metió el usuario en el Login
             byte[] newHash = Hash(password, salt);
 
-            return newHash.SequenceEqual(hash);
+            // 2. IMPRIMIMOS EN CONSOLA PARA AUDITAR EL ERROR
+            Console.WriteLine("=================== AUDITORÍA DE LOGIN ===================");
+            Console.WriteLine($"Contraseña recibida del formulario: '{password}'");
+            Console.WriteLine($"Salt recuperado de la BD: '{salt}'");
+            Console.WriteLine($"Hash recuperado de la BD (Base64): {Convert.ToBase64String(hash)}");
+            Console.WriteLine($"Nuevo Hash generado ahora (Base64): {Convert.ToBase64String(newHash)}");
+
+            // 3. Comparamos los tamaños
+            Console.WriteLine($"¿Mismo tamaño de bytes?: {hash.Length == newHash.Length} ({hash.Length} vs {newHash.Length})");
+
+            bool result = newHash.SequenceEqual(hash);
+            Console.WriteLine($"¿Resultado final de la comparación?: {result}");
+            Console.WriteLine("==========================================================");
+
+            return result;
         }
 
         private byte[] Hash(string password, string salt)

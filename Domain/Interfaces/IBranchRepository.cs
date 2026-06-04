@@ -9,14 +9,14 @@ namespace Domain.Interfaces
 {
     public interface IBranchRepository
     {
-		Task<List<Branch>> ObtenerTodos();
+		Task<List<Branch>> GetAll();
 
-		Task<Branch?> ObtenerPorId(int id);
+		Task<Branch?> GetById(int id);
 
-		Task<Branch> Crear(Branch branch);
+		Task<Branch> Create(Branch branch);
 
-		Task<Branch?> Actualizar(int id, Branch branch);
+		Task<Branch?> Update(int id, Branch branch);
 
-		Task<bool> Eliminar(int id);
+		Task<bool> Delete(int id);
 	}
 }

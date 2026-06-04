@@ -17,18 +17,18 @@ namespace API.Controllers
 
 		// GET: api/Branch
 		[HttpGet]
-		public async Task<IActionResult> ObtenerTodos()
+		public async Task<IActionResult> GetAll()
 		{
-			var branches = await _branchService.ObtenerTodos();
+			var branches = await _branchService.GetAll();
 
 			return Ok(branches);
 		}
 
 		// GET: api/Branch/5
 		[HttpGet("{id}")]
-		public async Task<IActionResult> ObtenerPorId(int id)
+		public async Task<IActionResult> GetById(int id)
 		{
-			var branch = await _branchService.ObtenerPorId(id);
+			var branch = await _branchService.GetById(id);
 
 			if (branch == null)
 			{
@@ -40,18 +40,18 @@ namespace API.Controllers
 
 		// POST: api/Branch
 		[HttpPost]
-		public async Task<IActionResult> Crear([FromBody] BranchDTO branchDTO)
+		public async Task<IActionResult> Create([FromBody] BranchDTO branchDTO)
 		{
-			var branchCreada = await _branchService.Crear(branchDTO);
+			var branchCreada = await _branchService.Create(branchDTO);
 
 			return Ok(branchCreada);
 		}
 
 		// PUT: api/Branch/5
 		[HttpPut("{id}")]
-		public async Task<IActionResult> Actualizar(int id, [FromBody] BranchDTO branchDTO)
+		public async Task<IActionResult> Update(int id, [FromBody] BranchDTO branchDTO)
 		{
-			var branchActualizada = await _branchService.Actualizar(id, branchDTO);
+			var branchActualizada = await _branchService.Update(id, branchDTO);
 
 			if (branchActualizada == null)
 			{
@@ -63,9 +63,9 @@ namespace API.Controllers
 
 		// DELETE: api/Branch/5
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> Eliminar(int id)
+		public async Task<IActionResult> Delete(int id)
 		{
-			var eliminado = await _branchService.Eliminar(id);
+			var eliminado = await _branchService.Delete(id);
 
 			if (!eliminado)
 			{
