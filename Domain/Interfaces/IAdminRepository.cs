@@ -9,6 +9,14 @@ namespace Domain.Interfaces
 {
     public interface IAdminRepository
     {
-        Task <Admin> Create(Admin admin);
+        Task<Admin> Create(Admin admin);
+
+        Task<Admin?> GetById(int id); 
+
+        Task<List<Admin>> GetAll();
+
+        Task<Admin> Update(Admin admin);
+
+        Task<bool> Delete(int id);
     }
 }
