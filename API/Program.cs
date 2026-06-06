@@ -52,6 +52,8 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped < IUserRepository, UserRepository>();
 builder.Services.AddScoped < IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+builder.Services.AddScoped<AdminAreaService>();
+builder.Services.AddScoped<IAdminAreaRepository, AdminAreaRepository>();
 
 
 
