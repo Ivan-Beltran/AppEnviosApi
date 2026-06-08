@@ -54,6 +54,10 @@ builder.Services.AddScoped < IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<AdminAreaService>();
 builder.Services.AddScoped<IAdminAreaRepository, AdminAreaRepository>();
+builder.Services.AddScoped<IPilotRepository, PilotRepository>();
+builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
+builder.Services.AddScoped<IShipmentConfirmationRepository, ShipmentConfirmationRepository>();
+builder.Services.AddScoped<PilotService>();
 
 
 
