@@ -59,7 +59,15 @@ namespace Infrastructure.Repositories
 			_context.AdminAreas.Update(adminArea);
 			await _context.SaveChangesAsync();
 
-			return true;
-		}
+			var user = await _context.Users.FindAsync(id);
+
+            if (user != null)
+            {
+                user.IsActive = false;
+                _context.Users.Update(user);
+            }
+            await _context.SaveChangesAsync();
+            return true; 
+        }
 	}
 }

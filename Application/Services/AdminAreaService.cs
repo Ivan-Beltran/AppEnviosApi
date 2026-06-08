@@ -1,4 +1,6 @@
 ﻿using Application.DTOs.AdminArea;
+using Application.DTOs.User;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
 
@@ -7,11 +9,17 @@ namespace Application.Services
 	public class AdminAreaService
 	{
 		private readonly IAdminAreaRepository _adminAreaRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordService _passwordService;
+        private readonly ITokenService _tokenService;
 
-		public AdminAreaService(IAdminAreaRepository adminAreaRepository)
+        public AdminAreaService(IAdminAreaRepository adminAreaRepository, IUserRepository userRepository, IPasswordService passwordService, ITokenService tokenService)
 		{
 			_adminAreaRepository = adminAreaRepository;
-		}
+			_userRepository = userRepository;
+			_passwordService = passwordService;
+			_tokenService = tokenService;
+        }
 
 		public async Task<List<AdminAreaDTO>> GetAllAdminArea()
 		{
@@ -54,46 +62,76 @@ namespace Application.Services
 			};
 		}
 
-		public async Task<AdminAreaDTO> CreateAdminArea(CreateAdminAreaDTO dto)
+		public async Task<int> CreateAdminArea(CreateAdminAreaDTO dto)
 		{
-			var adminArea = new AdminArea
-			{
-				Id = dto.UserId,
-				BranchId = dto.BranchId,
-				IsActive = true,
-				CreatedAt = DateTime.Now
-			};
+            var (passwordHash, salt) = _passwordService.HashPassword(dto.Password);
+            User userBase = new User()
+            {
+                FullName = dto.FullName,
+                Phone = dto.Phone,
+                Email = dto.Email,
+                Password = passwordHash,
+                Salt = salt,
+                RoleId = 2,
+                IsActive = true
+            };
 
-			var result = await _adminAreaRepository.Create(adminArea);
+            var createdUser = await _userRepository.Create(userBase);
+            
+            AdminArea adminArea = new AdminArea()
+            {
+				Id = createdUser.Id,
+                BranchId = dto.BranchId,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
 
-			return new AdminAreaDTO
-			{
-				UserId = result.Id,
-				BranchId = result.BranchId,
-				IsActive = result.IsActive,
-				CreatedAt = result.CreatedAt
-			};
+            await _adminAreaRepository.Create(adminArea);
+
+			return createdUser.Id;
 		}
 
-		public async Task<int> UpdateAdminArea(int id, UpdateAdminAreaDTO dto)
-		{
-			var adminArea = await _adminAreaRepository.GetById(id);
+        public async Task<int> UpdateAdminArea(int id, UpdateAdminAreaDTO dto)
+        {
+            using var transaction = await _userRepository.BeginTransactionAsync();
 
-			if (adminArea == null)
-			{
-				return -1;
-			}
+            try
+            {
+                // Buscar usuario base
+                var user = await _userRepository.GetById(id);
+                if (user == null || user.RoleId != 2) // 2 = AdminArea
+                    return -1;
 
-			adminArea.Id = dto.UserId;
-			adminArea.BranchId = dto.BranchId;
-			adminArea.IsActive = dto.IsActive;
+                // Actualizar datos de User
+                user.FullName = dto.FullName;
+                user.Phone=dto.Phone;
+                user.Email = dto.Email;
 
-			await _adminAreaRepository.Update(adminArea);
+                await _userRepository.Update(user);
 
-			return adminArea.Id;
-		}
+                // Buscar registro de AdminArea
+                var adminArea = await _adminAreaRepository.GetById(id);
+                if (adminArea == null)
+                    return -1;
 
-		public async Task<bool> DeleteAdminArea(int id)
+                // Actualizar datos específicos de AdminArea
+                adminArea.BranchId = dto.BranchId;
+              
+
+                await _adminAreaRepository.Update(adminArea);
+
+                await transaction.CommitAsync();
+
+                return user.Id;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteAdminArea(int id)
 		{
 			return await _adminAreaRepository.Delete(id);
 		}
