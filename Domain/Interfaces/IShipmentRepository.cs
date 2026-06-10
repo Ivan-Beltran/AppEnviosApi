@@ -4,8 +4,13 @@ namespace Domain.Interfaces
 {
     public interface IShipmentRepository
     {
-        Task<List<Shipment>> GetByPilotId(int pilotId);
-        Task<Shipment?> GetById(int shipmentId);
-        Task<Shipment> Update(Shipment shipment);
+        Task<Shipment> CreateAsync(Shipment shipment);
+        Task<Shipment?> GetByIdAsync(int id);
+        Task<List<Shipment>> GetAllAsync();
+        Task<Shipment> UpdateAsync(Shipment shipment);
+
+        Task<List<Shipment>> GetByBranchAsync(int branchId);
+
+        Task<List<Shipment>> GetByPilotAsync(int pilotId);
     }
 }

@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Pilot;
+﻿using Application.DTOs.AdminArea;
+using Application.DTOs.Pilot;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
 
@@ -9,88 +11,162 @@ namespace Application.Services
         private readonly IPilotRepository _pilotRepository;
         private readonly IShipmentRepository _shipmentRepository;
         private readonly IShipmentConfirmationRepository _confirmationRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordService _passwordService;
 
         public PilotService(
             IPilotRepository pilotRepository,
             IShipmentRepository shipmentRepository,
-            IShipmentConfirmationRepository confirmationRepository)
+            IShipmentConfirmationRepository confirmationRepository,
+            IUserRepository userRepository, 
+            IPasswordService passwordService)
         {
             _pilotRepository = pilotRepository;
             _shipmentRepository = shipmentRepository;
             _confirmationRepository = confirmationRepository;
+            _userRepository = userRepository;
+            _passwordService = passwordService;
+            
         }
 
-        public async Task<List<PilotShipmentDTO>> GetMyShipments(int userId)
+
+        public async Task<List<PilotDTO>> GetAllAsync(int roleId,int branchId)
         {
-            var pilot = await _pilotRepository.GetByUserId(userId);
-            if (pilot == null) return new List<PilotShipmentDTO>();
+            List<Pilot> pilots;
 
-            var shipments = await _shipmentRepository.GetByPilotId(pilot.Id);
-
-            return shipments.Select(s => new PilotShipmentDTO
+            if (roleId == 1)
             {
-                ShipmentId = s.Id,
-                ReceiverName = s.Receiver.FullName,
-                ReceiverPhone = s.Receiver.Phone,
-                DeliveryAddress = s.DeliveryAddress,
-                District = s.DistrictDelivery.DistrictName,
-                Status = s.ShipmentStatus.StatusName,
-                DeliveryDate = s.DeliveryDate
+                pilots = await _pilotRepository.GetAll();
+            }
+            else
+            {
+                pilots = await _pilotRepository.GetByBranchAsync(branchId);
+            }
+
+            return pilots.Select(p => new PilotDTO
+            {
+                UserId = p.Id,
+                FullName = p.User.FullName,
+                Email = p.User.Email,
+                BranchName = p.Branch.BranchName,
+                CreatedAt=p.CreatedAt,
+                LicenseNumber=p.LicenseNumber,
+                BranchId=p.BranchId,
+                IsActive=p.IsActive
             }).ToList();
         }
 
-        public async Task<bool> UpdateShipmentStatus(int shipmentId, int userId, int newStatusId)
+        public async Task<PilotDTO?> GetByIdAsync(
+            int id,
+            int roleId,
+            int branchId)
         {
-            var pilot = await _pilotRepository.GetByUserId(userId);
-            if (pilot == null) return false;
+            Pilot? pilot;
 
-            var shipment = await _shipmentRepository.GetById(shipmentId);
-            if (shipment == null || shipment.PilotId != pilot.Id) return false;
+            if (roleId == 1)
+            {
+                pilot = await _pilotRepository.GetById(id);
+            }
+            else
+            {
+                pilot = await _pilotRepository
+                    .GetByIdAndBranchAsync(id, branchId);
+            }
 
-            shipment.StatusId = newStatusId;
-            shipment.UpdateAt = DateTime.UtcNow;
-            await _shipmentRepository.Update(shipment);
-            return true;
+            if (pilot == null)
+                return null;
+
+            return new PilotDTO
+            {
+                UserId = pilot.Id,
+                FullName = pilot.User.FullName,
+                Email = pilot.User.Email,
+                BranchName = pilot.Branch.BranchName,
+                CreatedAt = pilot.CreatedAt,
+                LicenseNumber = pilot.LicenseNumber,
+                BranchId = pilot.BranchId,
+                IsActive = pilot.IsActive
+            };
         }
 
-        public async Task<bool> ConfirmDelivery(int shipmentId, int userId, ConfirmDeliveryDTO dto)
+        public async Task<int> CreatePilot(CreatePilotDTO dto)
         {
-            var pilot = await _pilotRepository.GetByUserId(userId);
-            if (pilot == null) return false;
-
-            var shipment = await _shipmentRepository.GetById(shipmentId);
-            if (shipment == null || shipment.PilotId != pilot.Id) return false;
-
-            // Estado 4 = ENTREGADO
-            shipment.StatusId = 4;
-            shipment.UpdateAt = DateTime.UtcNow;
-            await _shipmentRepository.Update(shipment);
-
-            var confirmation = new ShipmentConfirmation
+            var (passwordHash, salt) = _passwordService.HashPassword(dto.Password);
+            User userBase = new User()
             {
-                ShipmentId = shipmentId,
-                ReceiverSignature = dto.ReceiverSignature,
-                ConfirmationPhoto = dto.ConfirmationPhoto,
-                ConfirmationDate = DateTime.UtcNow
+                FullName = dto.FullName,
+                Phone = dto.PhoneNumber,
+                Email = dto.Email,
+                Password = passwordHash,
+                Salt = salt,
+                RoleId = 3,
+                IsActive = true
             };
 
-            await _confirmationRepository.Create(confirmation);
-            return true;
+            var createdUser = await _userRepository.Create(userBase);
+
+            Pilot pilot = new Pilot()
+            {
+                Id = createdUser.Id,
+                BranchId = dto.BranchId,
+                LicenseNumber = dto.LicenseNumber,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            await _pilotRepository.Create(pilot);
+
+            return createdUser.Id;
         }
 
-        public async Task<bool> ReportReturn(int shipmentId, int userId)
+        public async Task<int> UpdatePilot(int id, UpdatePilotDTO dto, int roleId, int branchId)
         {
-            var pilot = await _pilotRepository.GetByUserId(userId);
-            if (pilot == null) return false;
+            using var transaction = await _userRepository.BeginTransactionAsync();
 
-            var shipment = await _shipmentRepository.GetById(shipmentId);
-            if (shipment == null || shipment.PilotId != pilot.Id) return false;
+            try
+            {
+                var user = await _userRepository.GetById(id);
+                if (user == null || user.RoleId != 3)
+                    return -1;
 
-            // Estado 5 = DEVOLUCION
-            shipment.StatusId = 5;
-            shipment.UpdateAt = DateTime.UtcNow;
-            await _shipmentRepository.Update(shipment);
-            return true;
+                var pilot = await _pilotRepository.GetById(id);
+                if (pilot == null)
+                    return -1;
+
+                // Si es AreaAdmin (roleId == 2), solo puede editar pilotos de su sucursal
+                if (roleId == 2 && pilot.BranchId != branchId)
+                    return -2; // código para "sin permiso"
+
+                user.FullName = dto.FullName;
+                user.Phone = dto.PhoneNumber;
+                user.Email = dto.Email;
+                await _userRepository.Update(user);
+
+                pilot.BranchId = dto.BranchId;
+                await _pilotRepository.Update(pilot);
+
+                await transaction.CommitAsync();
+                return user.Id;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
+        public async Task<bool> DeletePilot(int id)
+        {
+            return await _pilotRepository.Delete(id);
+        }
+
+
+
+
+
+
+
+
+
     }
 }

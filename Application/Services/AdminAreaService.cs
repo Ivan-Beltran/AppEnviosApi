@@ -11,14 +11,12 @@ namespace Application.Services
 		private readonly IAdminAreaRepository _adminAreaRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
-        private readonly ITokenService _tokenService;
 
-        public AdminAreaService(IAdminAreaRepository adminAreaRepository, IUserRepository userRepository, IPasswordService passwordService, ITokenService tokenService)
+        public AdminAreaService(IAdminAreaRepository adminAreaRepository, IUserRepository userRepository, IPasswordService passwordService)
 		{
 			_adminAreaRepository = adminAreaRepository;
 			_userRepository = userRepository;
 			_passwordService = passwordService;
-			_tokenService = tokenService;
         }
 
 		public async Task<List<AdminAreaDTO>> GetAllAdminArea()

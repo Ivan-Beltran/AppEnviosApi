@@ -5,12 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Interfaces
+namespace Domain.Interfaces
 {
-    public interface ITokenService
+    public interface IShipmentReturn
     {
-        string GenerateToken(User user, int branchId = 0);
-
-
+        Task<ShipmentReturn> Create(ShipmentReturn shipmentReturn);
     }
 }

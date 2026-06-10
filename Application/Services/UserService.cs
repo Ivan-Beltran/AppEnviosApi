@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Interfaces;
 using Application.DTOs.Admin;
+using System.Runtime.InteropServices;
 namespace Application.Services
 {
     public class UserService
@@ -16,15 +17,24 @@ namespace Application.Services
         private readonly IPasswordService _passwordService;
         private readonly IAdminRepository _adminRepository;
         private readonly ITokenService _tokenService;
-    
-            
+        private readonly IAdminAreaRepository _adminAreaRepository;
+        private readonly ICompanyClient _companyClient;
+        private readonly IPilotRepository _pilotRepository;
 
-        public UserService(IUserRepository userRepository, IPasswordService passwordService,IAdminRepository adminRepository, ITokenService tokenService)
+
+
+        public UserService(IUserRepository userRepository, IPasswordService passwordService,IAdminRepository adminRepository, ITokenService tokenService,
+            IAdminAreaRepository adminAreaRepository,
+            IPilotRepository pilotRepository,
+            ICompanyClient companyClient)
         {
             _userRepository = userRepository;
             _passwordService = passwordService;
             _adminRepository = adminRepository;
             _tokenService = tokenService;
+            _adminAreaRepository = adminAreaRepository;
+            _pilotRepository = pilotRepository;
+            _companyClient = companyClient;
         }
         
         public async Task<List<AdminGlobalDTO>> GetAllAdminGlobal()
@@ -164,20 +174,21 @@ namespace Application.Services
 
         public async Task<string?> Login(LoginDTO dto)
         {
-           
             var user = await _userRepository.GetByEmailWithRole(dto.Email);
-
             if (user == null || !user.IsActive) return null;
 
             bool isPasswordCorrect = _passwordService.VerifyPassword(dto.Password, user.Salt, user.Password);
+            if (!isPasswordCorrect) return null;
 
-            if (!isPasswordCorrect)
+            // Buscar BranchId si es AreaAdmin (RoleId == 2)
+            int branchId = 0;
+            if (user.RoleId == 2)
             {
-                return null; 
+                var adminArea = await _adminAreaRepository.GetById(user.Id);
+                branchId = adminArea?.BranchId ?? 0;
             }
 
-            return _tokenService.GenerateToken(user);
-            
+            return _tokenService.GenerateToken(user, branchId);
         }
 
     }

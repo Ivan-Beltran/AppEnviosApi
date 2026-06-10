@@ -49,5 +49,7 @@ namespace Domain.Entities
         [ForeignKey("StatusId")]
         public ShipmentStatus ShipmentStatus { get; set; }
 
+        public ICollection<Package> Packages { get; set; } = new List<Package>();
+
     }
 }

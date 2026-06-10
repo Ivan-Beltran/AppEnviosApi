@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,29 +7,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Application.DTOs.Receiver
 {
-    public class Receiver
+    public class ReceiverDTO
     {
-        [Key]   
         public int Id { get; set; }
 
-        [Required]
         public string FullName { get; set; }
         [Required]
         public string Phone { get; set; }
         [Required]
         public string Email { get; set; }
-        [Required]
+    
         public string Address { get; set; }
-        [Required]
+  
         public int CreatedByUserId { get; set; }
 
-        [ForeignKey("CreatedByUserId")]
-        public User CreatedByUser { get; set; }
-        [Required]
+        public string CreatedByUserFullName { get; set; }
+
         public int DistrictId { get; set; }
-        [ForeignKey("DistrictId")]
-        public District District { get; set; }
+
+        public string DistrictName { get; set; }
     }
 }

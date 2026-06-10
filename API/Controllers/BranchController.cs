@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,7 +18,8 @@ namespace API.Controllers
 
 		// GET: api/Branch
 		[HttpGet]
-		public async Task<IActionResult> GetAll()
+        [Authorize(Roles = "GlobalAdmin")]
+        public async Task<IActionResult> GetAll()
 		{
 			var branches = await _branchService.GetAll();
 
@@ -26,7 +28,8 @@ namespace API.Controllers
 
 		// GET: api/Branch/5
 		[HttpGet("{id}")]
-		public async Task<IActionResult> GetById(int id)
+        [Authorize(Roles = "GlobalAdmin")]
+        public async Task<IActionResult> GetById(int id)
 		{
 			var branch = await _branchService.GetById(id);
 
@@ -40,7 +43,8 @@ namespace API.Controllers
 
 		// POST: api/Branch
 		[HttpPost]
-		public async Task<IActionResult> Create([FromBody] BranchDTO branchDTO)
+        [Authorize(Roles = "GlobalAdmin")]
+        public async Task<IActionResult> Create([FromBody] BranchDTO branchDTO)
 		{
 			var branchCreada = await _branchService.Create(branchDTO);
 
@@ -49,7 +53,8 @@ namespace API.Controllers
 
 		// PUT: api/Branch/5
 		[HttpPut("{id}")]
-		public async Task<IActionResult> Update(int id, [FromBody] BranchDTO branchDTO)
+        [Authorize(Roles = "GlobalAdmin")]
+        public async Task<IActionResult> Update(int id, [FromBody] BranchDTO branchDTO)
 		{
 			var branchActualizada = await _branchService.Update(id, branchDTO);
 
@@ -63,7 +68,8 @@ namespace API.Controllers
 
 		// DELETE: api/Branch/5
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = "GlobalAdmin")]
+        public async Task<IActionResult> Delete(int id)
 		{
 			var eliminado = await _branchService.Delete(id);
 

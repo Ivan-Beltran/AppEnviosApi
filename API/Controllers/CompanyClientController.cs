@@ -1,52 +1,40 @@
-﻿using Application.DTOs.AdminArea;
+﻿using Application.DTOs.CompanyClient;
 using Application.DTOs.Pilot;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-    public class PilotController : ControllerBase
+    public class CompanyClientController : ControllerBase
     {
-        private readonly PilotService _pilotService;
+        private readonly CompanyClientService _companyClientService;
 
-        public PilotController(PilotService pilotService)
+        public CompanyClientController(CompanyClientService companyClientService)
         {
-            _pilotService = pilotService;
+            _companyClientService = companyClientService;
         }
 
-        [HttpGet("GetAllPilot")]
+        [HttpGet("GetAllClient")]
         [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-        public async Task<IActionResult> GetAll()
+        public async Task<List<CompanyClientDTO>> GetAllAdminArea()
         {
-            var roleId = int.Parse(User.FindFirst("RoleId")!.Value);
-            var branchId = int.Parse(User.FindFirst("BranchId")!.Value);
-
-            var result = await _pilotService.GetAllAsync(roleId, branchId);
-            return Ok(result);
+            return await _companyClientService.GetAllCompanyClient();
         }
 
-        [HttpGet("GetByIdPilot/{id}")]
+        [HttpGet("GetByIdClient")]
         [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<CompanyClientDTO?> GetByIdAdminArea(int id)
         {
-            var roleId = int.Parse(User.FindFirst("RoleId")!.Value);
-            var branchId = int.Parse(User.FindFirst("BranchId")!.Value);
-            var result = await _pilotService.GetByIdAsync(id,roleId,branchId);
-
-            if (result == null)
-                return NotFound(new { message = $"Piloto con ID {id} no encontrado." });
-
-            return Ok(result);
+            return await _companyClientService.GetByIdCompanyClient(id);
         }
 
-        [HttpPost("create-pilot")]
+        [HttpPost("create-client")]
         [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-        public async Task<IActionResult> CreatePilot([FromBody] CreatePilotDTO dto)
+        public async Task<IActionResult> CreateClient([FromBody] CreateCompanyClientDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -55,7 +43,7 @@ namespace API.Controllers
 
             try
             {
-                var result = await _pilotService.CreatePilot(dto);
+                var result = await _companyClientService.CreateCompanyClient(dto);
 
                 return Ok(result);
             }
@@ -71,26 +59,28 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update-pilot/{id}")]
+        [HttpPut("update-client/{id}")]
         [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-        public async Task<IActionResult> UpdatePilot(int id, [FromBody] UpdatePilotDTO dto)
+        public async Task<IActionResult> UpdateCompanyClient(int id, [FromBody] UpdateCompanyClientDTO dto)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
-
-            var roleId = int.Parse(User.FindFirst("RoleId")!.Value);
-            var branchId = int.Parse(User.FindFirst("BranchId")!.Value);
+            }
 
             try
             {
-                var result = await _pilotService.UpdatePilot(id, dto, roleId, branchId);
+                var result = await _companyClientService.UpdateCompanyClient(id, dto);
 
-                return result switch
+                if (result == -1)
                 {
-                    -2 => Forbid(), // AreaAdmin intentando editar piloto de otra sucursal
-                    -1 => NotFound(new { message = "Piloto no encontrado." }),
-                    _ => Ok(new { message = "Piloto actualizado con éxito.", pilotId = result })
-                };
+                    return NotFound(new
+                    {
+                        message = "Admin de área no encontrado"
+                    });
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -102,13 +92,13 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("adminArea/{id}")]
+        [HttpDelete("Client/{id}")]
         [Authorize(Roles = "AreaAdmin,GlobalAdmin")]
-        public async Task<IActionResult> DeleteAdminArea(int id)
+        public async Task<IActionResult> DeleteCompanyClient(int id)
         {
             try
             {
-                var result = await _pilotService.DeletePilot(id);
+                var result = await _companyClientService.DeleteCompanyClient(id);
 
                 if (!result)
                 {
@@ -120,7 +110,7 @@ namespace API.Controllers
 
                 return Ok(new
                 {
-                    message = "piloto desactivado con éxito."
+                    message = "cliente desactivado con éxito."
                 });
             }
             catch (Exception ex)

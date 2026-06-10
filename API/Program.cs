@@ -57,6 +57,9 @@ builder.Services.AddScoped<IAdminAreaRepository, AdminAreaRepository>();
 builder.Services.AddScoped<IPilotRepository, PilotRepository>();
 builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
 builder.Services.AddScoped<IShipmentConfirmationRepository, ShipmentConfirmationRepository>();
+builder.Services.AddScoped<ICompanyClient, CompanyClientRepository>();
+builder.Services.AddScoped<IReceiverRepository, ReceiverRepository>();
+builder.Services.AddScoped<IShipmentReturn, ShipmentReturnRepository>();
 builder.Services.AddScoped<PilotService>();
 
 
@@ -101,6 +104,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BranchService>();
+builder.Services.AddScoped<CompanyClientService>();
+builder.Services.AddScoped<ReceiverService>();
+builder.Services.AddScoped<ShipmentService>();
 
 
 var app = builder.Build();
